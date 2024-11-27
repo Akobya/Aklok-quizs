@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Quiz Application</title>
+</head>
+<body>
+  <p>Question:</p>
+  <div id="question"></div>
+  <div id="option"></div>
+  <div id="result"></div>
+  <button id="submit-btn" onclick="next()">Submit</button>
+  <button id="restart-btn" onclick="restart()" style="display: none;">Restart</button>
+
+  <script>
+    const questions = [
+      { 
+        question: "What is epistemology?",
+        option: ["Study of nature", "Study of human beings", "Study of reality"],
+        correct: 2
+      },
+      { 
+        question: "What is the capital of France?",
+        option: ["Berlin", "Madrid", "Paris"],
+        correct: 2
+      },
+      { 
+        question: "Which planet is known as the Red Planet?",
+        option: ["Earth", "Mars", "Jupiter"],
+        correct: 1
+      }
+    ];
+
+    let score = 0;
+    let currentQuestion = 0;
+    let userAnswers = [];
+
+    const outQuestion = document.querySelector('#question');
+    const outOption = document.querySelector('#option');
+    const outResult = document.querySelector('#result');
+    const submitBtn = document.querySelector('#submit-btn');
+    const restartBtn = document.querySelector('#restart-btn');
+
+    function display() {
+      if (currentQuestion >= questions.length) {
+        showFinalResult();
+        return;
+      }
+
+      // Display the current question
+      const questionData = questions[currentQuestion];
+      outQuestion.innerHTML = questionData.question;
+
+      // Display the options
+      const optionsHtml = questionData.option
+        .map((option, index) => 
+          `<label>
+            <input type="radio" name="answer" value="${index}">
+            ${option}
+          </label><br>`
+        )
+        .join('');
+      outOption.innerHTML = optionsHtml;
+
+      outResult.innerHTML = ""; // Clear previous result
+    }
+
+    function next() {
+      const selectedOption = document.querySelector('input[name="answer"]:checked');
+      if (!selectedOption) {
+        outResult.innerHTML = "Please select an answer!";
+        return;
+      }
+
+      const answer = parseInt(selectedOption.value);
+      userAnswers.push({ 
+        question: questions[currentQuestion].question,
+        selected: answer,
+        correct: questions[currentQuestion].correct,
+        selectedOption: questions[currentQuestion].option[answer],
+        correctOption: questions[currentQuestion].option[questions[currentQuestion].correct]
+      });
+
+      if (answer === questions[currentQuestion].correct) {
+        score++;
+        outResult.innerHTML = "Correct!";
+      } else {
+        outResult.innerHTML = "Wrong answer.";
+      }
+
+      currentQuestion++;
+      display();
+    }
+
+    function showFinalResult() {
+      outQuestion.innerHTML = "Quiz completed!";
+      outOption.innerHTML = "";
+      outResult.innerHTML = `
+        <h3>Your final score is: ${score}/${questions.length}</h3>
+        <h4>Results:</h4>
+        <ul>
+          ${userAnswers.map(answer => `
+            <li>
+              <strong>Question:</strong> ${answer.question}<br>
+              <strong>Your Answer:</strong> ${answer.selectedOption || "No answer"}<br>
+              <strong>Correct Answer:</strong> ${answer.correctOption}
+              ${answer.selected === answer.correct ? " ✔️" : " ❌"}
+            </li>
+          `).join('')}
+        </ul>
+      `;
+      submitBtn.style.display = "none";
+      restartBtn.style.display = "inline-block";
+    }
+
+    function restart() {
+      score = 0;
+      currentQuestion = 0;
+      userAnswers = [];
+      submitBtn.style.display = "inline-block";
+      restartBtn.style.display = "none";
+      display();
+    }
+
+    // Initial display
+    display();
+  </script>
+</body>
+</html>
